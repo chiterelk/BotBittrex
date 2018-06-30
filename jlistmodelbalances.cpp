@@ -34,13 +34,13 @@ QVariant JListModelBalances::data(const QModelIndex &index, int role) const
 		switch(role)
 		{
 		case Qt::DisplayRole:
-			return wallet.at(row)->getCurrency();
+			return wallet.at(row).getCurrency();
 		case Qt::EditRole:
-			return wallet.at(row)->getCurrency();
+			return wallet.at(row).getCurrency();
 		case Qt::TextAlignmentRole:
 			return Qt::AlignCenter;
 		case Qt::BackgroundColorRole:
-			if(wallet.at(row)->getCurrency()=="ETH" || wallet.at(row)->getCurrency()=="BTC" || wallet.at(row)->getCurrency()=="USDT")
+			if(wallet.at(row).getCurrency()=="ETH" || wallet.at(row).getCurrency()=="BTC" || wallet.at(row).getCurrency()=="USDT")
 			{
 				return QBrush(QColor("#F2F2F2"));
 			}
@@ -51,13 +51,13 @@ QVariant JListModelBalances::data(const QModelIndex &index, int role) const
 		switch(role)
 		{
 		case Qt::DisplayRole:
-			return QString::number(wallet.at(row)->getBalance(),'f',8);
+			return QString::number(wallet.at(row).getBalance(),'f',8);
 		case Qt::EditRole:
-			return QString::number(wallet.at(row)->getBalance(),'f',8);
+			return QString::number(wallet.at(row).getBalance(),'f',8);
 		case Qt::TextAlignmentRole:
 			return Qt::AlignCenter;
 		case Qt::BackgroundColorRole:
-			if(wallet.at(row)->getCurrency()=="ETH" || wallet.at(row)->getCurrency()=="BTC" || wallet.at(row)->getCurrency()=="USDT")
+			if(wallet.at(row).getCurrency()=="ETH" || wallet.at(row).getCurrency()=="BTC" || wallet.at(row).getCurrency()=="USDT")
 			{
 				return QBrush(QColor("#F2F2F2"));
 			}
@@ -68,13 +68,13 @@ QVariant JListModelBalances::data(const QModelIndex &index, int role) const
 		switch(role)
 		{
 		case Qt::DisplayRole:
-			return QString::number(wallet.at(row)->getAvailable(),'f',8);
+			return QString::number(wallet.at(row).getAvailable(),'f',8);
 		case Qt::EditRole:
-			return QString::number(wallet.at(row)->getAvailable(),'f',8);
+			return QString::number(wallet.at(row).getAvailable(),'f',8);
 		case Qt::TextAlignmentRole:
 			return Qt::AlignCenter;
 		case Qt::BackgroundColorRole:
-			if(wallet.at(row)->getCurrency()=="ETH" || wallet.at(row)->getCurrency()=="BTC" || wallet.at(row)->getCurrency()=="USDT")
+			if(wallet.at(row).getCurrency()=="ETH" || wallet.at(row).getCurrency()=="BTC" || wallet.at(row).getCurrency()=="USDT")
 			{
 				return QBrush(QColor("#F2F2F2"));
 			}
@@ -96,7 +96,7 @@ Qt::ItemFlags JListModelBalances::flags(const QModelIndex &index) const
 	return Qt::ItemIsEnabled | Qt::ItemIsEditable;
 }
 
-void JListModelBalances::setBalances(QList<JBalance *> _wallet)
+void JListModelBalances::setBalances(QList<JBalance> &_wallet)
 {
 	if(!wallet.isEmpty())
 		wallet.clear();

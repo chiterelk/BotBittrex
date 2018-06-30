@@ -31,17 +31,17 @@ public:
 
 public slots:
 	void successWalletIsFalse();
-	void gotWalletFirstTime(QList<JBalance *> _wallet);
-	void gotWallet(QList<JBalance *> _wallet);
-	void gotTickers(QList <JTickers*> _tickers);
+	void gotWalletFirstTime(QList<JBalance> _wallet);
+	void gotWallet(QList<JBalance> _wallet);
+	void gotTickers(QList <JTickers> _tickers);
 
-	void showBalances(QList<JBalance *> &_wallet);
+	void showBalances(QList<JBalance> &_wallet);
 	void showOrders();
 
-	void gotMarkets(QList <JMarket*> _markets);
+	void gotMarkets(QList <JMarket> _markets);
 	void openedBuyOrder(QString _uuid);
 	void openedSellOrder(QString _uuid);
-	void gotOpenOrders(QList <JOpenedOrder*> _openedOrders);
+	void gotOpenOrders(QList <JOpenedOrder> _openedOrders);
 	void canceledOrder();
 	void mainProcess();
 private slots:
@@ -64,13 +64,13 @@ private:
 
 
 	JBittrex *bittrex;
-	QList<JBalance *> wallet;
-	QList<JTickers *> tickers;
-	QList<JTickers *> tickersShow;
+	QList<JBalance> wallet;
+	QList<JTickers> tickers;
+	QList<JTickers> tickersShow;
 	JListModelBalances * listModelBalances;
 	JListModelEvents * listModelEvents;
 	JListModelOpenOrder * listModelOpenedOrder;
-	JTickers * tickerSpread;
+	JTickers tickerSpread;
 	QList <JSellOrder*> buyOrders;
 	QList <JOpenedOrder*> openedBuyOrders;
 	QList <JOpenedOrder*> openedSellOrders;

@@ -16,10 +16,10 @@ public:
 	int columnCount(const QModelIndex &parent) const;
 	QVariant data(const QModelIndex &index, int role) const;
 	Qt::ItemFlags flags(const QModelIndex &index) const;
-	void setBalances(QList <JBalance*> _wallet);
+	void setBalances(QList <JBalance> &_wallet);
 	QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 private:
-	QList <JBalance*> wallet;
+	QList <JBalance> wallet;
 };
 
 #endif // JLISTMODELBALANCES_H

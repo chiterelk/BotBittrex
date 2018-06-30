@@ -2,11 +2,6 @@
 #include "QDebug"
 #include "QDateTime"
 
-JTickers::JTickers(QObject *parent) : QObject(parent)
-{
-
-}
-
 JTickers::JTickers(QString _marketName, double _ask, double _bid, double _baseVolume)
 {
 
@@ -33,6 +28,11 @@ JTickers::JTickers(QString _marketName, double _ask, double _bid, double _baseVo
 	//
 	//
 	//
+}
+
+JTickers::JTickers()
+{
+
 }
 
 void JTickers::setCreated(QString _created)
@@ -65,7 +65,7 @@ void JTickers::setPrevDay(double _prevDay)
 
 }
 
-uint JTickers::hawOld()
+uint JTickers::hawOld() const
 {
 	return QDateTime::currentDateTime().toTime_t() - createdUNIX_;
 }

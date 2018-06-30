@@ -26,7 +26,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	badPairs<<"BTC-VEE";
 	badPairs<<"BTC-DOPE";
 	badPairs<<"BTC-PTC";
-	badPairs<<"BTC-PART";
 
 
 
@@ -45,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(bittrex,&JBittrex::openedSellOrder,this,&MainWindow::openedSellOrder);
 	connect(bittrex,&JBittrex::canceledOrder,this,&MainWindow::canceledOrder);
 	connect(bittrex,&JBittrex::gotOpenOrders,this,&MainWindow::gotOpenOrders);
-
+	walletTimer->start(10000);
 	oldMounth = 3; //допускаются пары не моложе n месяцев
 
 	ui->tableViewBalances->setModel(listModelBalances);
@@ -99,7 +98,6 @@ void MainWindow::on_pushButtonStart_clicked()
 	numberOrders = ui->spinBoxNumberOrders->value();
 	martingail = ui->lineEditMartingale->text().toDouble();
 	perestanovka = ui->lineEditPerestanovka->text().toDouble();
-	walletTimer->start(10000);
 
 	listModelEvents->addEvent("Бот запущен!");
 }
@@ -119,7 +117,7 @@ void MainWindow::getWallet()
 	bittrex->getWallet(apiKey,secretKey);
 }
 
-void MainWindow::gotWalletFirstTime(QList<JBalance *> _wallet)
+void MainWindow::gotWalletFirstTime(QList<JBalance> _wallet)
 {
 	disconnect(bittrex,&JBittrex::gotWallet,this,&MainWindow::gotWalletFirstTime);
 	ui->labelTryAgain->show();
@@ -142,7 +140,7 @@ void MainWindow::gotWalletFirstTime(QList<JBalance *> _wallet)
 
 }
 
-void MainWindow::gotWallet(QList<JBalance *> _wallet)
+void MainWindow::gotWallet(QList<JBalance> _wallet)
 {
 	if(!wallet.isEmpty())
 		wallet.clear();
@@ -152,20 +150,20 @@ void MainWindow::gotWallet(QList<JBalance *> _wallet)
 	showBalances(wallet);
 }
 
-void MainWindow::gotTickers(QList<JTickers *> _tickers)
+void MainWindow::gotTickers(QList<JTickers> _tickers)
 {
 	disconnect(bittrex,&JBittrex::gotTickers,this,&MainWindow::gotTickers);
 	if(!tickers.isEmpty())
 		tickers.clear();
 	//tickersShow = _tickers;
-	for(JTickers *ticker : _tickers)
+	for(JTickers ticker : _tickers)
 	{
-		if(ticker->getMarketName()==marketName)
+		if(ticker.getMarketName()==marketName)
 		{
 			ui->groupBoxPair->setTitle(marketName);
-			ui->labelAsk->setText(QString::number(ticker->getAsk(),'g',8));
-			ui->labelBid->setText(QString::number(ticker->getBid(),'g',8));
-			ui->labelSpread->setText(QString::number(ticker->getSpread(),'g',8));
+			ui->labelAsk->setText(QString::number(ticker.getAsk(),'g',8));
+			ui->labelBid->setText(QString::number(ticker.getBid(),'g',8));
+			ui->labelSpread->setText(QString::number(ticker.getSpread(),'g',8));
 			break;
 		}
 	}
@@ -174,11 +172,11 @@ void MainWindow::gotTickers(QList<JTickers *> _tickers)
 	{
 		uint time = QDateTime::currentDateTime().toTime_t();
 		time-= oldMounth*2629743;
-		for(JTickers *ticker : _tickers)
+		for(JTickers ticker : _tickers)
 		{
-			if(ticker->getCreatedUNIX()<time)
+			if(ticker.getCreatedUNIX()<time)
 			{
-				if(ticker->getBaseCurrency() == mainCurrency)
+				if(ticker.getBaseCurrency() == mainCurrency)
 				{
 					tickers << ticker;
 				}
@@ -198,22 +196,26 @@ void MainWindow::gotTickers(QList<JTickers *> _tickers)
 	}
 }
 
-void MainWindow::showBalances(QList<JBalance *> &_wallet)
+void MainWindow::showBalances(QList<JBalance> &_wallet)
 {
 	if(ui->checkBox->isChecked())
 	{
-		QList<JBalance *> walletWithoutZeroBalances;
+		QList<JBalance> walletWithoutZeroBalances;
 		if(!_wallet.isEmpty())
 		{
-			for(JBalance* balance : _wallet)
+			for(JBalance balance : _wallet)
 			{
-				if(!(balance->getAvailable()==0 && balance->getBalance()==0))
+				if(!(balance.getAvailable()==0 && balance.getBalance()==0))
 				{
 					walletWithoutZeroBalances<<balance;
 				}
 			}
 		}
 		listModelBalances->setBalances(walletWithoutZeroBalances);
+		if(!walletWithoutZeroBalances.isEmpty())
+		{
+			walletWithoutZeroBalances.clear();
+		}
 	}else{
 		listModelBalances->setBalances(_wallet);
 	}
@@ -251,17 +253,17 @@ void MainWindow::showOrders()
 
 }
 
-void MainWindow::gotMarkets(QList<JMarket *> _markets)
+void MainWindow::gotMarkets(QList<JMarket> _markets)
 {
 	disconnect(bittrex,&JBittrex::gotMarkets,this,&MainWindow::gotMarkets);
 	if(!_markets.isEmpty())
 	{
-		for(JMarket* market : _markets)
+		for(JMarket market : _markets)
 		{
-			if(market->getMarketName() == tickerSpread->getMarketName())
+			if(market.getMarketName() == tickerSpread.getMarketName())
 			{
-				minTradeSize = market->getMinTradeSize();
-				marketName = market->getMarketName();
+				minTradeSize = market.getMinTradeSize();
+				marketName = market.getMarketName();
 				process = 3;
 				showProcess();
 			}
@@ -307,18 +309,18 @@ void MainWindow::openedSellOrder(QString _uuid)
 	}
 }
 
-void MainWindow::gotOpenOrders(QList<JOpenedOrder *> _openedOrders)
+void MainWindow::gotOpenOrders(QList<JOpenedOrder> _openedOrders)
 {
 	qDebug()<<"gotOpenOrders";
 	if(!openedBuyOrders.isEmpty())
 	{
 		double buyOrderExecuted = true;
-		for(JOpenedOrder * _openedOrder: _openedOrders)
+		for(JOpenedOrder _openedOrder: _openedOrders)
 		{
-			if(openedBuyOrders.first()->getOrderUuid() == _openedOrder->getOrderUuid())
+			if(openedBuyOrders.first()->getOrderUuid() == _openedOrder.getOrderUuid())
 			{
 				buyOrderExecuted = false;
-				qDebug()<<_openedOrder->getQuantity();
+				qDebug()<<_openedOrder.getQuantity();
 				break;
 			}
 		}
@@ -338,12 +340,12 @@ void MainWindow::gotOpenOrders(QList<JOpenedOrder *> _openedOrders)
 	if(!openedSellOrders.isEmpty())
 	{
 		double sellOrderExecuted = true;
-		for(JOpenedOrder * _openedOrder: _openedOrders)
+		for(JOpenedOrder _openedOrder: _openedOrders)
 		{
-			if(openedSellOrders.first()->getOrderUuid() == _openedOrder->getOrderUuid())
+			if(openedSellOrders.first()->getOrderUuid() == _openedOrder.getOrderUuid())
 			{
 				sellOrderExecuted = false;
-				qDebug()<<_openedOrder->getQuantity();
+				qDebug()<<_openedOrder.getQuantity();
 				break;
 			}
 		}
@@ -351,11 +353,6 @@ void MainWindow::gotOpenOrders(QList<JOpenedOrder *> _openedOrders)
 		{
 			process = 7;
 			showProcess();
-			if(!openedSellOrders.isEmpty())
-			{
-				openedSellOrders.clear();
-			}
-
 			listModelEvents->addEvent("Ордер на продажу исполнен.");
 		}
 	}
@@ -423,7 +420,7 @@ void MainWindow::mainProcess()
 			{
 				for(int n = 0; n<badPairs.count();n++)
 				{
-					if(tickers.at(i)->getMarketName()==badPairs.at(n))
+					if(tickers.at(i).getMarketName()==badPairs.at(n))
 					{
 						tickers.removeAt(i);
 						break;
@@ -432,7 +429,7 @@ void MainWindow::mainProcess()
 			}
 			for(int i = tickers.count()-1;i>=0;i--)//убираю хуевые пары.
 			{
-				if(tickers.at(i)->getBid() < 0.00002057)
+				if(tickers.at(i).getBid() < 0.00002057)
 				{
 					tickers.removeAt(i);
 				}
@@ -440,20 +437,20 @@ void MainWindow::mainProcess()
 			for(int i = tickers.count()-1;i>=0;i--)//убираю хуевые пары.
 			{
 
-				if(tickers.at(i)->getPercentUp() > 0.10)
+				if(tickers.at(i).getPercentUp() > 0.10)
 				{
 					tickers.removeAt(i);
 				}
 			}
-			for(JTickers * ticker : tickers)
+			for(JTickers ticker : tickers)
 			{
-				if(ticker->getSpread() > minSpread)
+				if(ticker.getSpread() > minSpread)
 				{
-					if(ticker->getSpread() < 0.05)
+					if(ticker.getSpread() < 0.05)
 					{
-						if(ticker->getBaseVolume()>baseVolume)
+						if(ticker.getBaseVolume()>baseVolume)
 						{
-							baseVolume = ticker->getBaseVolume();
+							baseVolume = ticker.getBaseVolume();
 							tickerSpread = ticker;
 						}
 					}
@@ -472,10 +469,10 @@ void MainWindow::mainProcess()
 		//qDebug()<<"I am here!3";
 		if(!tickers.isEmpty())
 		{
-			JTickers * selectedTicker;
-			for(JTickers * ticker:tickers)
+			JTickers selectedTicker;
+			for(JTickers ticker:tickers)
 			{
-				if(ticker->getMarketName()==marketName)
+				if(ticker.getMarketName()==marketName)
 				{
 					if(mainCurrency =="BTC")
 					{
@@ -489,23 +486,23 @@ void MainWindow::mainProcess()
 			}
 			if(!wallet.isEmpty())
 			{
-				for(JBalance* balance:wallet)
+				for(JBalance balance:wallet)
 				{
-					if(balance->getCurrency()==mainCurrency)
+					if(balance.getCurrency()==mainCurrency)
 					{
 
-							double x = (100*selectedTicker->getBid()-100*selectedTicker->getAsk()+selectedTicker->getAsk()*(selectedTicker->getSpread()*0.8*100))/((selectedTicker->getSpread()*0.8*100)-200);
+							double x = (100*selectedTicker.getBid()-100*selectedTicker.getAsk()+selectedTicker.getAsk()*(selectedTicker.getSpread()*0.8*100))/((selectedTicker.getSpread()*0.8*100)-200);
 							double priceBuy;
 							double priceSell;
-							priceBuy = QString::number(selectedTicker->getBid()+x*0.1,'f',8).toDouble();
-							priceSell = QString::number(selectedTicker->getAsk()-x*1.9,'f',8).toDouble();
+							priceBuy = QString::number(selectedTicker.getBid()+x*0.1,'f',8).toDouble();
+							priceSell = QString::number(selectedTicker.getAsk()-x*1.9,'f',8).toDouble();
 							if(priceBuy==priceSell)
 								priceSell = priceSell + 0.00000001;
 							profit = (priceSell-priceBuy)/priceSell;
 
 
 
-							Deposit = deposit * balance->getAvailable();
+							Deposit = deposit * balance.getAvailable();
 							if(minTradeSizeMainCurrency != 0)
 							{
 								double summ = 0;
@@ -541,7 +538,7 @@ void MainWindow::mainProcess()
 											  buyOrders << new JSellOrder(price,(stepQuantity + martingail * stepQuantity * i)/price,marketName);
 											  qDebug()<<"Price: "<<buyOrders.last()->getPrice();
 									}
-									qDebug()<<selectedTicker->getMarketName();
+									qDebug()<<selectedTicker.getMarketName();
 									qDebug()<<"buyOrders.count()"<<buyOrders.count();
 									mainTimer->setInterval(2000);
 									process = 4;
@@ -581,11 +578,11 @@ void MainWindow::mainProcess()
 		{
 			if(openedSellOrders.count() == numberOrders)
 			{
-				for(JTickers * ticker : tickers)
+				for(JTickers ticker : tickers)
 				{
-					if(ticker->getMarketName() == marketName)
+					if(ticker.getMarketName() == marketName)
 					{
-						if(ticker->getBid() > (openedBuyOrders.first()->getPrice()*(1+perestanovka)))
+						if(ticker.getBid() > (openedBuyOrders.first()->getPrice()*(1+perestanovka)))
 						{
 							//ui->console->append("Цена ушла. Переставляю ордера");
 							//sendMesageToTelegram("Цена ушла. Переставляю ордера.");

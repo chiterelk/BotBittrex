@@ -47,13 +47,13 @@ public:
 signals:
 	ping(int _ping);
 	successWalletIsFalse();
-	gotTickers(QList <JTickers*> _tickers);
-	gotWallet(QList <JBalance*> _wallet);
-	gotMarkets(QList <JMarket*> _markets);
-	gotCurrencies(QList <JCurrency*> _markets);
+	gotTickers(QList <JTickers> _tickers);
+	gotWallet(QList <JBalance> _wallet);
+	gotMarkets(QList <JMarket> _markets);
+	gotCurrencies(QList <JCurrency> _markets);
 	openedBuyOrder(QString _uuid);
 	openedSellOrder(QString _uuid);
-	gotOpenOrders(QList <JOpenedOrder*> _openedOrders);
+	gotOpenOrders(QList <JOpenedOrder> _openedOrders);
 	canceledOrder();
 private slots:
 

@@ -18,7 +18,8 @@ private:
 	uint createdUNIX_ = 0;
 public:
 	JMarket();
-	void setMarketCurrency(QString _marketCurrency){	QString marketCurrency_ = _marketCurrency;	};
+	JMarket(QString _marketCurrency, QString _baseCurrency, QString _marketCurrencyLong, QString _baseCurrencyLong, double _minTradeSize, QString _marketName, bool _isActive, QString _created);
+	void setMarketCurrency(const QString _marketCurrency ){	marketCurrency_ = _marketCurrency;	};
 	void setBaseCurrency(QString _baseCurrency){	baseCurrency_ = _baseCurrency;	};
 	void setMarketCurrencyLong(QString _marketCurrencyLong){	marketCurrencyLong_ = _marketCurrencyLong;	};
 	void setBaseCurrencyLong(QString _baseCurrencyLong){	baseCurrencyLong_ = _baseCurrencyLong;	};
@@ -28,15 +29,15 @@ public:
 	void setCreated(QString _created);
 
 
-	QString getMarketCurrency(){	return marketCurrency_;	};
-	QString getBaseCurrency(){	return baseCurrency_;	};
-	QString getMarketCurrencyLong(){	return marketCurrencyLong_;	};
-	QString getBaseCurrencyLong(){	return baseCurrencyLong_;	};
-	double getMinTradeSize(){	return minTradeSize_;	};
-	QString getMarketName(){	return marketName_;	};
-	bool getIsActive(){	return isActive_;	};
-	QString getCreated(){	return created_;	};
-	uint getCreatedUNIX(){	return createdUNIX_;	};
+	QString getMarketCurrency() const {	return marketCurrency_;	};
+	QString getBaseCurrency() const {	return baseCurrency_;	};
+	QString getMarketCurrencyLong() const {	return marketCurrencyLong_;	};
+	QString getBaseCurrencyLong() const {	return baseCurrencyLong_;	};
+	double getMinTradeSize() const {	return minTradeSize_;	};
+	QString getMarketName() const {	return marketName_;	};
+	bool getIsActive() const {	return isActive_;	};
+	QString getCreated() const {	return created_;	};
+	uint getCreatedUNIX() const {	return createdUNIX_;	};
 
 };
 

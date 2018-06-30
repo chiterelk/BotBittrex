@@ -114,7 +114,7 @@ void JBittrex::gotReply(QNetworkReply *reply)//прием и обработка 
 		{
 			if(url.indexOf("https://bittrex.com/api/v1.1/public/getmarketsummaries") >= 0)//получение котировок
 			{
-				qDebug()<<"1";
+				//qDebug()<<"1";
 				emit ping(pingGetTickers_.elapsed());
 				if(!reply->error())
 				{
@@ -124,14 +124,14 @@ void JBittrex::gotReply(QNetworkReply *reply)//прием и обработка 
 					{
 						if(root.value("result").isArray())
 						{
-							QList <JTickers*> tickers;
+							QList <JTickers> tickers;
 							QJsonArray result = root.value("result").toArray();
 							for(int i = 0; i<result.count();i++)
 							{
 								QJsonObject n = result.at(i).toObject();
-								tickers << new JTickers(n.value("MarketName").toString(),n.value("Ask").toDouble(),n.value("Bid").toDouble(),n.value("BaseVolume").toDouble());
-								tickers.back()->setCreated(n.value("Created").toString());
-								tickers.back()->setPrevDay(n.value("PrevDay").toDouble());
+								tickers << JTickers(n.value("MarketName").toString(),n.value("Ask").toDouble(),n.value("Bid").toDouble(),n.value("BaseVolume").toDouble());
+								tickers.back().setCreated(n.value("Created").toString());
+								tickers.back().setPrevDay(n.value("PrevDay").toDouble());
 							}
 							emit gotTickers(tickers);
 						}else{
@@ -144,7 +144,7 @@ void JBittrex::gotReply(QNetworkReply *reply)//прием и обработка 
 					qDebug()<<"Error!";
 				}
 			}else{
-				qDebug()<<"2";
+				//qDebug()<<"2";
 				emit ping(pingGetMarkets_.elapsed());
 				if(!reply->error())
 				{
@@ -157,19 +157,21 @@ void JBittrex::gotReply(QNetworkReply *reply)//прием и обработка 
 						if(root.value("result").isArray())
 						{
 							QJsonArray result = root.value("result").toArray();
-							QList <JMarket*> markets;
+							QList <JMarket> markets;
 							for(int i = 0; i < result.count();i++)
 							{
 								QJsonObject n = result.at(i).toObject();
-								markets << new JMarket();
-								markets.at(i)->setMarketCurrency(n.value("MarketCurrency").toString());
-								markets.at(i)->setBaseCurrency(n.value("BaseCurrency").toString());
-								markets.at(i)->setMarketCurrencyLong(n.value("MarketCurrencyLong").toString());
-								markets.at(i)->setBaseCurrencyLong(n.value("BaseCurrencyLong").toString());
-								markets.at(i)->setMinTradeSize(n.value("MinTradeSize").toDouble());
-								markets.at(i)->setMarketName(n.value("MarketName").toString());
-								markets.at(i)->setIsActive(n.value("IsActive").toBool());
-								markets.at(i)->setCreated(n.value("Created").toString());
+								markets << JMarket(n.value("MarketCurrency").toString(), n.value("BaseCurrency").toString(),
+											n.value("MarketCurrencyLong").toString(),n.value("BaseCurrencyLong").toString(),n.value("MinTradeSize").toDouble(),
+											n.value("MarketName").toString(),n.value("IsActive").toBool(),n.value("Created").toString());
+//								markets.at(i).setMarketCurrency(n.value("MarketCurrency").toString());
+//								markets.at(i).setBaseCurrency(n.value("BaseCurrency").toString());
+//								markets.at(i).setMarketCurrencyLong(n.value("MarketCurrencyLong").toString());
+//								markets.at(i).setBaseCurrencyLong(n.value("BaseCurrencyLong").toString());
+//								markets.at(i).setMinTradeSize(n.value("MinTradeSize").toDouble());
+//								markets.at(i).setMarketName(n.value("MarketName").toString());
+//								markets.at(i).setIsActive(n.value("IsActive").toBool());
+//								markets.at(i).setCreated(n.value("Created").toString());
 							}
 							emit gotMarkets(markets);
 						}else{
@@ -199,11 +201,11 @@ void JBittrex::gotReply(QNetworkReply *reply)//прием и обработка 
 					if(root.value("result").isArray())
 					{
 						QJsonArray result = root.value("result").toArray();
-						QList <JCurrency*> currencies;
+						QList <JCurrency> currencies;
 						for(int i = 0; i < result.count();i++)
 						{
 							QJsonObject n = result.at(i).toObject();
-							currencies << new JCurrency(n.value("Currency").toString(),n.value("CurrencyLong").toString(),n.value("IsActive").toBool());
+							currencies << JCurrency(n.value("Currency").toString(),n.value("CurrencyLong").toString(),n.value("IsActive").toBool());
 						}
 						emit gotCurrencies(currencies);
 					}else{
@@ -231,13 +233,17 @@ void JBittrex::gotReply(QNetworkReply *reply)//прием и обработка 
 					if(root.value("result").isArray())
 					{
 						QJsonArray result = root.value("result").toArray();
-						QList <JBalance*> wallet;
+						QList <JBalance> wallet;
 						for(int i = 0; i < result.count();i++)
 						{
 							QJsonObject n = result.at(i).toObject();
-							wallet << new JBalance(n.value("Currency").toString(),n.value("Balance").toDouble(),n.value("Available").toDouble());
+							wallet << JBalance(n.value("Currency").toString(),n.value("Balance").toDouble(),n.value("Available").toDouble());
 						}
 						emit gotWallet(wallet);
+						if(!wallet.isEmpty())
+						{
+							wallet.clear();
+						}
 					}else{
 						qDebug()<<"Result is not array";
 					}
@@ -306,17 +312,18 @@ void JBittrex::gotReply(QNetworkReply *reply)//прием и обработка 
 					if(root.value("result").isArray())
 					{
 						QJsonArray result = root.value("result").toArray();
-						QList <JOpenedOrder*> openedOrders;
+						QList <JOpenedOrder> openedOrders;
 						for(int i = 0; i < result.count();i++)
 						{
 							QJsonObject n = result.at(i).toObject();
-							openedOrders << new JOpenedOrder();
-							openedOrders.at(i)->setOrderUuid(n.value("OrderUuid").toString());
-							openedOrders.at(i)->setExchange(n.value("Exchenge").toString());
-							openedOrders.at(i)->setOrderType(n.value("OrderType").toString());
-							openedOrders.at(i)->setQuantity(n.value("Quantity").toDouble());
-							openedOrders.at(i)->setQuantityRemaining(n.value("QuantityRemaining").toDouble());
-							openedOrders.at(i)->setLimit(n.value("Limit").toDouble());
+							openedOrders << JOpenedOrder(n.value("OrderUuid").toString(), n.value("Exchenge").toString(), n.value("OrderType").toString(),
+																  n.value("Quantity").toDouble(), n.value("QuantityRemaining").toDouble(), n.value("Limit").toDouble());
+//							openedOrders.at(i).setOrderUuid(n.value("OrderUuid").toString());
+//							openedOrders.at(i).setExchange(n.value("Exchenge").toString());
+//							openedOrders.at(i).setOrderType(n.value("OrderType").toString());
+//							openedOrders.at(i).setQuantity(n.value("Quantity").toDouble());
+//							openedOrders.at(i).setQuantityRemaining(n.value("QuantityRemaining").toDouble());
+//							openedOrders.at(i).setLimit(n.value("Limit").toDouble());
 						}
 						emit gotOpenOrders(openedOrders);
 					}else{

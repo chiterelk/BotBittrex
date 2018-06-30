@@ -1,11 +1,9 @@
 #ifndef JTICKERS_H
 #define JTICKERS_H
+#include <QString>
 
-#include <QObject>
-
-class JTickers : public QObject
+class JTickers
 {
-	Q_OBJECT
 private:
 	double ask_ = 0;
 	double bid_ = 0;
@@ -20,30 +18,26 @@ private:
 	double percentUp_ = 0;//как виросла валюта за день.
 
 	public:
-	explicit JTickers(QObject *parent = nullptr);
 	JTickers(QString _marketName, double _ask, double _bid, double _baseVolume);
+	JTickers();
 	void setAsk(double _ask){	ask_ = _ask;	};
 	void setBid(double _bid){	bid_ = _bid;	};
 	void setMarketName(QString _marketName){	marketName_ = _marketName;	};
 	void setCreated(QString _created);
 	void setPrevDay(double _prevDay);
 
-	double getAsk(void){	return ask_;	};
-	double getBid(void){	return bid_;	};
-	double getSpread(void){	return spread_;	};
-	double getRank(void){	return rank_;	};
-	QString getMarketName(void){	return marketName_;	};
-	double getBaseVolume(){ return baseVolume_; };
-	QString getBaseCurrency(){	return baseCurrency_;	};
-	QString getCreated(){	return created_;	};
-	uint getCreatedUNIX(){	return createdUNIX_;	};
-	uint hawOld();
-	double getPrevDay(){	return prevDay_;};
-	double getPercentUp(){	return percentUp_;};
-
-signals:
-
-public slots:
+	double getAsk(void) const {	return ask_;	};
+	double getBid(void) const {	return bid_;	};
+	double getSpread(void) const {	return spread_;	};
+	double getRank(void) const {	return rank_;	};
+	QString getMarketName(void) const {	return marketName_;	};
+	double getBaseVolume() const { return baseVolume_; };
+	QString getBaseCurrency() const {	return baseCurrency_;	};
+	QString getCreated() const {	return created_;	};
+	uint getCreatedUNIX() const {	return createdUNIX_;	};
+	uint hawOld() const ;
+	double getPrevDay() const {	return prevDay_;};
+	double getPercentUp() const {	return percentUp_;};
 };
 
 #endif // JTICKERS_H

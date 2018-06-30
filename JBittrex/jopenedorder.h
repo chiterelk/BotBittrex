@@ -18,15 +18,17 @@ private:
 public:
 
 	JOpenedOrder(QString _orderUuid){	orderUuid_ = _orderUuid;	};
+	JOpenedOrder(QString _orderUuid,QString _exchange,QString _orderType,double _quantity,double _quantityRemaining,double _limit);;
 	JOpenedOrder(){};
-	QString getOrderUuid(){	return orderUuid_;	};
-	QString getExchange(){	return exchange_;	};
-	QString getOrderType(){	return orderType_;	};
-	double getQuantity(){	return quantity_;	};
-	double getQuantityRemaining(){	return quantityRemaining_;	};
-	double getLimit(){	return limit_;	};
-	double getPrice(){	return price_; };
-	QString getType(){	return type_; };
+
+	QString getOrderUuid() const {	return orderUuid_;	};
+	QString getExchange() const {	return exchange_;	};
+	QString getOrderType() const {	return orderType_;	};
+	double getQuantity() const {	return quantity_;	};
+	double getQuantityRemaining() const {	return quantityRemaining_;	};
+	double getLimit() const {	return limit_;	};
+	double getPrice() const {	return price_; };
+	QString getType() const {	return type_; };
 
 	void setOrderUuid(QString _orderUuid){	orderUuid_ = _orderUuid;	};
 	void setExchange(QString _exchange){	exchange_ = _exchange;	};
