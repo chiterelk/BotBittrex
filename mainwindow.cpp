@@ -86,7 +86,7 @@ void MainWindow::on_pushButtonStart_clicked()
 
 	connect(bittrex,&JBittrex::gotWallet,this,&MainWindow::gotWalletFirstTime);
 	connect(bittrex,&JBittrex::successWalletIsFalse,this,&MainWindow::successWalletIsFalse);
-	connect(bittrex,&JBittrex::gotWallet,this,gotWallet);
+	connect(bittrex,&JBittrex::gotWallet,this,&MainWindow::gotWallet);
 
 	bittrex->getWallet(apiKey,secretKey);
 	ui->groupBoxStart->hide();
@@ -212,8 +212,7 @@ void MainWindow::showBalances(QList<JBalance> &_wallet)
 			}
 		}
 		listModelBalances->setBalances(walletWithoutZeroBalances);
-		if(!walletWithoutZeroBalances.isEmpty())
-		{
+		if(!walletWithoutZeroBalances.isEmpty()){
 			walletWithoutZeroBalances.clear();
 		}
 	}else{
@@ -231,8 +230,8 @@ void MainWindow::showOrders()
 	{
 		 for(int i = 0;i<openedSellOrders.count();i++)
 		 {
-			 listModelOpenedOrder->addRow(openedSellOrders.at(i)->getOrderUuid(),openedSellOrders.at(i)->getPrice(),openedSellOrders.at(i)->getQuantity(),
-											 openedSellOrders.at(i)->getType());
+			 listModelOpenedOrder->addRow(openedSellOrders.at(i).getOrderUuid(),openedSellOrders.at(i).getPrice(),openedSellOrders.at(i).getQuantity(),
+											 openedSellOrders.at(i).getType());
 		 }
 
 	}
@@ -240,8 +239,8 @@ void MainWindow::showOrders()
 	{
 		 for(int i = 0;i<openedBuyOrders.count();i++)
 		 {
-			 listModelOpenedOrder->addRow(openedBuyOrders.at(i)->getOrderUuid(),openedBuyOrders.at(i)->getPrice(),openedBuyOrders.at(i)->getQuantity(),
-											 openedBuyOrders.at(i)->getType());
+			 listModelOpenedOrder->addRow(openedBuyOrders.at(i).getOrderUuid(),openedBuyOrders.at(i).getPrice(),openedBuyOrders.at(i).getQuantity(),
+											 openedBuyOrders.at(i).getType());
 		 }
 
 	}
@@ -276,8 +275,8 @@ void MainWindow::openedBuyOrder(QString _uuid)
 {
 	bittrex->getWallet(apiKey,secretKey);
 	//openedBuyOrders << new JOrder(orderId);
-	openedBuyOrders.last()->setOrderUuid(_uuid);
-	openedBuyOrders.last()->setType("Buy");
+	openedBuyOrders.last().setOrderUuid(_uuid);
+	openedBuyOrders.last().setType("Buy");
 	buyOrders.removeFirst();
 	if(!buyOrders.isEmpty())
 	{
@@ -297,10 +296,10 @@ void MainWindow::openedSellOrder(QString _uuid)
 	bittrex->getWallet(apiKey,secretKey);
 	if(process == 13)
 	{
-		openedSellOrders << new JOpenedOrder(_uuid);
-		openedSellOrders.last()->setType("Sell");
-		openedSellOrders.last()->setPrice(midPrice*(1+profit));
-		openedSellOrders.last()->setQuantity(summQuantity-0.00000001);
+		openedSellOrders <<JOpenedOrder(_uuid);
+		openedSellOrders.last().setType("Sell");
+		openedSellOrders.last().setPrice(midPrice*(1+profit));
+		openedSellOrders.last().setQuantity(summQuantity-0.00000001);
 		process = 5;
 		showProcess();
 		showOrders();
@@ -317,7 +316,7 @@ void MainWindow::gotOpenOrders(QList<JOpenedOrder> _openedOrders)
 		double buyOrderExecuted = true;
 		for(JOpenedOrder _openedOrder: _openedOrders)
 		{
-			if(openedBuyOrders.first()->getOrderUuid() == _openedOrder.getOrderUuid())
+			if(openedBuyOrders.first().getOrderUuid() == _openedOrder.getOrderUuid())
 			{
 				buyOrderExecuted = false;
 				qDebug()<<_openedOrder.getQuantity();
@@ -326,8 +325,8 @@ void MainWindow::gotOpenOrders(QList<JOpenedOrder> _openedOrders)
 		}
 		if(buyOrderExecuted)
 		{
-			midPrice = (midPrice*summQuantity+ openedBuyOrders.first()->getPrice()*openedBuyOrders.first()->getQuantity())/(summQuantity+openedBuyOrders.first()->getQuantity());
-			summQuantity += openedBuyOrders.first()->getQuantity();
+			midPrice = (midPrice*summQuantity+ openedBuyOrders.first().getPrice()*openedBuyOrders.first().getQuantity())/(summQuantity+openedBuyOrders.first().getQuantity());
+			summQuantity += openedBuyOrders.first().getQuantity();
 			qDebug()<<"midPrice: "<<midPrice;
 			qDebug()<<"summQuntity: "<<QString::number(summQuantity,'f',8);
 			openedBuyOrders.removeFirst();
@@ -342,7 +341,7 @@ void MainWindow::gotOpenOrders(QList<JOpenedOrder> _openedOrders)
 		double sellOrderExecuted = true;
 		for(JOpenedOrder _openedOrder: _openedOrders)
 		{
-			if(openedSellOrders.first()->getOrderUuid() == _openedOrder.getOrderUuid())
+			if(openedSellOrders.first().getOrderUuid() == _openedOrder.getOrderUuid())
 			{
 				sellOrderExecuted = false;
 				qDebug()<<_openedOrder.getQuantity();
@@ -535,8 +534,8 @@ void MainWindow::mainProcess()
 
 											  qDebug()<<"Quantity"<<i+1<<": "<<(stepQuantity + martingail * stepQuantity * i)/price;
 											  //buyOrders << new JSellOrder(price,(stepQuantity + pow(martingail,i) * stepQuantity)/price,currensyPair);
-											  buyOrders << new JSellOrder(price,(stepQuantity + martingail * stepQuantity * i)/price,marketName);
-											  qDebug()<<"Price: "<<buyOrders.last()->getPrice();
+											  buyOrders <<JSellOrder(price,(stepQuantity + martingail * stepQuantity * i)/price,marketName);
+											  qDebug()<<"Price: "<<buyOrders.last().getPrice();
 									}
 									qDebug()<<selectedTicker.getMarketName();
 									qDebug()<<"buyOrders.count()"<<buyOrders.count();
@@ -563,10 +562,10 @@ void MainWindow::mainProcess()
 		if(!buyOrders.isEmpty())
 		{
 			//qDebug()<<currensyPair<<buyOrders.first()->getPrice()<<buyOrders.first()->getQuantity();
-			bittrex->openBuyOrder(apiKey,secretKey,marketName,buyOrders.first()->getQuantity(),buyOrders.first()->getPrice());
-			openedBuyOrders.append(new JOpenedOrder());
-			openedBuyOrders.last()->setPrice(buyOrders.first()->getPrice());
-			openedBuyOrders.last()->setQuantity(buyOrders.first()->getQuantity());
+			bittrex->openBuyOrder(apiKey,secretKey,marketName,buyOrders.first().getQuantity(),buyOrders.first().getPrice());
+			openedBuyOrders.append(JOpenedOrder());
+			openedBuyOrders.last().setPrice(buyOrders.first().getPrice());
+			openedBuyOrders.last().setQuantity(buyOrders.first().getQuantity());
 			process = 11;
 			showProcess();
 			return;
@@ -582,7 +581,7 @@ void MainWindow::mainProcess()
 				{
 					if(ticker.getMarketName() == marketName)
 					{
-						if(ticker.getBid() > (openedBuyOrders.first()->getPrice()*(1+perestanovka)))
+						if(ticker.getBid() > (openedBuyOrders.first().getPrice()*(1+perestanovka)))
 						{
 							//ui->console->append("Цена ушла. Переставляю ордера");
 							//sendMesageToTelegram("Цена ушла. Переставляю ордера.");
@@ -615,7 +614,7 @@ void MainWindow::mainProcess()
 		}else{
 			process = 12;
 			showProcess();
-			bittrex->cancelOrder(apiKey,secretKey,openedSellOrders.first()->getOrderUuid());
+			bittrex->cancelOrder(apiKey,secretKey,openedSellOrders.first().getOrderUuid());
 		}
 		return;
 	case 7:
@@ -626,7 +625,7 @@ void MainWindow::mainProcess()
 		{
 			process = 14;
 			showProcess();
-			bittrex->cancelOrder(apiKey,secretKey,openedBuyOrders.first()->getOrderUuid());
+			bittrex->cancelOrder(apiKey,secretKey,openedBuyOrders.first().getOrderUuid());
 		}else{
 				//mainTimer->stop();
 				bittrex->getWallet(apiKey,secretKey);

@@ -357,7 +357,7 @@ void JBittrex::gotReply(QNetworkReply *reply)//прием и обработка 
 	}else{
 		qDebug()<<reply->errorString();
 	}
-
+	reply->deleteLater();
 }
 
 

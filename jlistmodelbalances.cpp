@@ -101,8 +101,6 @@ void JListModelBalances::setBalances(QList<JBalance> &_wallet)
 	if(!wallet.isEmpty())
 		wallet.clear();
 	wallet = _wallet;
-	if(!_wallet.isEmpty())
-		_wallet.clear();
 	emit layoutChanged();
 }
 QVariant JListModelBalances::headerData(int section, Qt::Orientation orientation, int role) const

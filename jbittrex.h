@@ -45,16 +45,16 @@ public:
 	void getOpenOrders(QString _apiKey, QString _secretKey);
 
 signals:
-	ping(int _ping);
-	successWalletIsFalse();
-	gotTickers(QList <JTickers> _tickers);
-	gotWallet(QList <JBalance> _wallet);
-	gotMarkets(QList <JMarket> _markets);
-	gotCurrencies(QList <JCurrency> _markets);
-	openedBuyOrder(QString _uuid);
-	openedSellOrder(QString _uuid);
-	gotOpenOrders(QList <JOpenedOrder> _openedOrders);
-	canceledOrder();
+	void ping(int _ping);
+	void successWalletIsFalse();
+	void gotTickers(QList <JTickers> _tickers);
+	void gotWallet(QList <JBalance> _wallet);
+	void gotMarkets(QList <JMarket> _markets);
+	void gotCurrencies(QList <JCurrency> _markets);
+	void openedBuyOrder(QString _uuid);
+	void openedSellOrder(QString _uuid);
+	void gotOpenOrders(QList <JOpenedOrder> _openedOrders);
+	void canceledOrder();
 private slots:
 
 

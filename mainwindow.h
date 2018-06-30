@@ -71,9 +71,9 @@ private:
 	JListModelEvents * listModelEvents;
 	JListModelOpenOrder * listModelOpenedOrder;
 	JTickers tickerSpread;
-	QList <JSellOrder*> buyOrders;
-	QList <JOpenedOrder*> openedBuyOrders;
-	QList <JOpenedOrder*> openedSellOrders;
+	QList <JSellOrder> buyOrders;
+	QList <JOpenedOrder> openedBuyOrders;
+	QList <JOpenedOrder> openedSellOrders;
 
 
 
