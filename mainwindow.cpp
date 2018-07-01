@@ -318,31 +318,74 @@ void MainWindow::openedSellOrder(QString _uuid)
 void MainWindow::gotOpenOrders(QList<JOpenedOrder> _openedOrders)
 {
 	qDebug()<<"gotOpenOrders";
+	int n = 0;
 	if(!openedBuyOrders.isEmpty())
 	{
-		double buyOrderExecuted = true;
-		for(JOpenedOrder _openedOrder: _openedOrders)
+		for(JOpenedOrder _openedBuyOrder:openedBuyOrders)
 		{
-			if(openedBuyOrders.first().getOrderUuid() == _openedOrder.getOrderUuid())
+			double buyOrderExecuted = true;
+			for(JOpenedOrder _openedOrder: _openedOrders)
 			{
-				buyOrderExecuted = false;
-				qDebug()<<_openedOrder.getQuantity();
-				break;
+				if(_openedBuyOrder.getOrderUuid() == _openedOrder.getOrderUuid())
+				{
+					buyOrderExecuted = false;
+					qDebug()<<_openedOrder.getQuantity();
+					break;
+				}
+			}
+			if(buyOrderExecuted)
+			{
+				n++;
+				midPrice = (midPrice*summQuantity+ openedBuyOrders.first().getPrice()*openedBuyOrders.first().getQuantity())/(summQuantity+openedBuyOrders.first().getQuantity());
+				summQuantity += openedBuyOrders.first().getQuantity();
+				qDebug()<<"midPrice: "<<midPrice;
+				qDebug()<<"summQuntity: "<<QString::number(summQuantity,'f',8);
+				openedBuyOrders.removeFirst();
+				showOrders();
+				process = 6;
+				showProcess();
+				listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Ордер на покупку исполнен.");
+				sendMesageToTelegram("Ордер на покупку исполнен.");
+				if(n>1)
+				{
+					mainTimer->stop();
+					mainTimer->setInterval(60000);
+					mainTimer->start();
+				}else{
+					if(mainTimer->interval()==60000)
+					{
+						mainTimer->stop();
+						mainTimer->setInterval(5000);
+						mainTimer->start();
+					}
+				}
 			}
 		}
-		if(buyOrderExecuted)
-		{
-			midPrice = (midPrice*summQuantity+ openedBuyOrders.first().getPrice()*openedBuyOrders.first().getQuantity())/(summQuantity+openedBuyOrders.first().getQuantity());
-			summQuantity += openedBuyOrders.first().getQuantity();
-			qDebug()<<"midPrice: "<<midPrice;
-			qDebug()<<"summQuntity: "<<QString::number(summQuantity,'f',8);
-			openedBuyOrders.removeFirst();
-			showOrders();
-			process = 6;
-			showProcess();
-			listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Ордер на покупку исполнен.");
-			sendMesageToTelegram("Ордер на покупку исполнен.");
-		}
+
+
+//		double buyOrderExecuted = true;
+//		for(JOpenedOrder _openedOrder: _openedOrders)
+//		{
+//			if(openedBuyOrders.first().getOrderUuid() == _openedOrder.getOrderUuid())
+//			{
+//				buyOrderExecuted = false;
+//				qDebug()<<_openedOrder.getQuantity();
+//				break;
+//			}
+//		}
+//		if(buyOrderExecuted)
+//		{
+//			midPrice = (midPrice*summQuantity+ openedBuyOrders.first().getPrice()*openedBuyOrders.first().getQuantity())/(summQuantity+openedBuyOrders.first().getQuantity());
+//			summQuantity += openedBuyOrders.first().getQuantity();
+//			qDebug()<<"midPrice: "<<midPrice;
+//			qDebug()<<"summQuntity: "<<QString::number(summQuantity,'f',8);
+//			openedBuyOrders.removeFirst();
+//			showOrders();
+//			process = 6;
+//			showProcess();
+//			listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Ордер на покупку исполнен.");
+//			sendMesageToTelegram("Ордер на покупку исполнен.");
+//		}
 	}
 	if(!openedSellOrders.isEmpty())
 	{
