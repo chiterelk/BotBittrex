@@ -636,7 +636,7 @@ void MainWindow::mainProcess()
 			showProcess();
 //			if(midPrice > bid*(1-otstup))
 //			{
-				bittrex->openSellOrder(apiKey,secretKey,marketName,summQuantity-0.00000001,midPrice*(1+profit));
+				bittrex->openSellOrder(apiKey,secretKey,marketName,summQuantity/*-0.00000001*/,midPrice*(1+profit));
 //			}
 
 		}else{
