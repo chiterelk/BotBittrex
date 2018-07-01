@@ -14,6 +14,7 @@
 #include "jsellorder.h"
 
 #include <QDateTime>
+#include <QNetworkAccessManager>
 
 #include <QLabel>
 
@@ -42,6 +43,9 @@ public slots:
 	void openedBuyOrder(QString _uuid);
 	void openedSellOrder(QString _uuid);
 	void gotOpenOrders(QList <JOpenedOrder> _openedOrders);
+	void answerFromTelegram(QNetworkReply * reply);
+
+
 	void canceledOrder();
 	void mainProcess();
 private slots:
@@ -49,6 +53,7 @@ private slots:
 	void showProcess();
 	void showPing(int ping);
 	void getWallet();
+	void sendMesageToTelegram(QString _mesage);
 
 
 
@@ -74,6 +79,7 @@ private:
 	QList <JSellOrder> buyOrders;
 	QList <JOpenedOrder> openedBuyOrders;
 	QList <JOpenedOrder> openedSellOrders;
+	QNetworkAccessManager * NAMTelegram = new QNetworkAccessManager(this);
 
 
 

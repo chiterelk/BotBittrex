@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
+#include <QDateTime>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -44,6 +45,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(bittrex,&JBittrex::openedSellOrder,this,&MainWindow::openedSellOrder);
 	connect(bittrex,&JBittrex::canceledOrder,this,&MainWindow::canceledOrder);
 	connect(bittrex,&JBittrex::gotOpenOrders,this,&MainWindow::gotOpenOrders);
+
+	connect(NAMTelegram,&QNetworkAccessManager::finished,this,&MainWindow::answerFromTelegram);
 	walletTimer->start(10000);
 	oldMounth = 3; //допускаются пары не моложе n месяцев
 
@@ -99,7 +102,8 @@ void MainWindow::on_pushButtonStart_clicked()
 	martingail = ui->lineEditMartingale->text().toDouble();
 	perestanovka = ui->lineEditPerestanovka->text().toDouble();
 
-	listModelEvents->addEvent("Бот запущен!");
+	listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Бот запущен!");
+	sendMesageToTelegram("Бот запущен!");
 }
 
 void MainWindow::showProcess()
@@ -287,7 +291,8 @@ void MainWindow::openedBuyOrder(QString _uuid)
 		process = 5;
 		showProcess();
 		showOrders();
-		listModelEvents->addEvent("Ордера на покупку виставлены.");
+		listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Ордера на покупку виставлены.");
+		sendMesageToTelegram("Ордера на покупку виставлены.");
 	}
 }
 
@@ -303,8 +308,10 @@ void MainWindow::openedSellOrder(QString _uuid)
 		process = 5;
 		showProcess();
 		showOrders();
-		listModelEvents->addEvent("Ордер на продажу виставлен/переставлен.");
-		listModelEvents->addEvent("Мониторю.");
+		listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Ордер на продажу виставлен/переставлен.");
+		listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Мониторю.");
+		sendMesageToTelegram("Ордер на продажу виставлен/переставлен.");
+		sendMesageToTelegram("Мониторю.");
 	}
 }
 
@@ -333,7 +340,8 @@ void MainWindow::gotOpenOrders(QList<JOpenedOrder> _openedOrders)
 			showOrders();
 			process = 6;
 			showProcess();
-			listModelEvents->addEvent("Ордер на покупку исполнен.");
+			listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Ордер на покупку исполнен.");
+			sendMesageToTelegram("Ордер на покупку исполнен.");
 		}
 	}
 	if(!openedSellOrders.isEmpty())
@@ -352,11 +360,23 @@ void MainWindow::gotOpenOrders(QList<JOpenedOrder> _openedOrders)
 		{
 			process = 7;
 			showProcess();
-			listModelEvents->addEvent("Ордер на продажу исполнен.");
+			listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Ордер на продажу исполнен.");
+			sendMesageToTelegram("Ордер на продажу исполнен.");
 		}
 	}
 
 
+}
+
+void MainWindow::answerFromTelegram(QNetworkReply *reply)
+{
+	if(!reply->error())
+	{
+		//qDebug()<<reply->readAll();
+	}else{
+		//qDebug()<<"Answer from telegram error";
+	}
+	reply->deleteLater();
 }
 
 void MainWindow::canceledOrder()
@@ -400,6 +420,12 @@ void MainWindow::on_pushButton_clicked()
 {
 	bittrex->getWallet(apiKey,secretKey);
 
+}
+void MainWindow::sendMesageToTelegram(QString _mesage)
+{
+	QUrl url;
+	url.setUrl("https://api.telegram.org/bot571686449:AAGj56dmUTo1D44r5eXIkLBw4B2Eq-ORiRY/sendMessage?chat_id=324087454&text="+QDateTime::currentDateTime().toString("dd.MM.yy hh:mm:ss")+": "+_mesage);
+	NAMTelegram->get(QNetworkRequest(url));
 }
 
 void MainWindow::mainProcess()
@@ -542,9 +568,11 @@ void MainWindow::mainProcess()
 									mainTimer->setInterval(2000);
 									process = 4;
 									showProcess();
-									listModelEvents->addEvent("Начинаю выставлять ордера на покупку.");
+									listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Начинаю выставлять ордера на покупку.");
+									sendMesageToTelegram("Начинаю выставлять ордера на покупку.");
 								}else{
-									listModelEvents->addEvent("Недоствточный баланс.");
+									listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Недоствточный баланс.");
+									sendMesageToTelegram("Недоствточный баланс.");
 									process = 0;
 									showProcess();
 									mainTimer->stop();
@@ -584,8 +612,8 @@ void MainWindow::mainProcess()
 						if(ticker.getBid() > (openedBuyOrders.first().getPrice()*(1+perestanovka)))
 						{
 							//ui->console->append("Цена ушла. Переставляю ордера");
-							//sendMesageToTelegram("Цена ушла. Переставляю ордера.");
-							listModelEvents->addEvent("Цена ушла. Переставляю ордера.");
+							sendMesageToTelegram("Цена ушла. Переставляю ордера.");
+							listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Цена ушла. Переставляю ордера.");
 							process = 7;
 							showProcess();
 						}
@@ -629,7 +657,8 @@ void MainWindow::mainProcess()
 		}else{
 				//mainTimer->stop();
 				bittrex->getWallet(apiKey,secretKey);
-				listModelEvents->addEvent("Конец");
+				listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Сделка завершена");
+				sendMesageToTelegram("Сделка завершена");
 				process = 0;
 				showProcess();
 				if(!buyOrders.isEmpty())

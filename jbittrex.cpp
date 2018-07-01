@@ -240,6 +240,7 @@ void JBittrex::gotReply(QNetworkReply *reply)//прием и обработка 
 							wallet << JBalance(n.value("Currency").toString(),n.value("Balance").toDouble(),n.value("Available").toDouble());
 						}
 						emit gotWallet(wallet);
+						qDebug()<<"ljitk";
 						if(!wallet.isEmpty())
 						{
 							wallet.clear();
