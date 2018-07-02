@@ -309,8 +309,15 @@
          <string>Events</string>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="0">
+         <item row="1" column="0">
           <widget class="QListView" name="listViewEvents"/>
+         </item>
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="checkBoxStop">
+           <property name="text">
+            <string>Остановиться при окончании цикла.</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

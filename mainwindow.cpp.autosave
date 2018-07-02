@@ -331,6 +331,8 @@ void MainWindow::gotOpenOrders(QList<JOpenedOrder> _openedOrders)
 					buyOrderExecuted = false;
 					//double n = _openedOrder.getQuantity()-_openedOrder.getQuantityRemaining()
 					qDebug()<<_openedOrder.getQuantity()-_openedOrder.getQuantityRemaining()<<"/"<<_openedOrder.getQuantity();
+					if(_openedBuyOrder.getQuantityRemaining() != _openedOrder.getQuantityRemaining())
+						qDebug()<<"Ордер исполнен на половину";						
 					break;
 				}
 			}
