@@ -331,6 +331,8 @@ void MainWindow::gotOpenOrders(QList<JOpenedOrder> _openedOrders)
 					buyOrderExecuted = false;
 					//double n = _openedOrder.getQuantity()-_openedOrder.getQuantityRemaining()
 					qDebug()<<_openedOrder.getQuantity()-_openedOrder.getQuantityRemaining()<<"/"<<_openedOrder.getQuantity();
+					if(_openedBuyOrder.getQuantityRemaining() != _openedOrder.getQuantityRemaining())
+						qDebug()<<"Ордер исполнен на половину";
 					break;
 				}
 			}
@@ -645,21 +647,26 @@ void MainWindow::mainProcess()
 	case 5://мониторинг
 		connect(bittrex,&JBittrex::gotTickers,this,&MainWindow::gotTickers);
 		bittrex->getTickers();
-		if(!openedSellOrders.isEmpty())
+		if(!openedBuyOrders.isEmpty())
 		{
-			if(openedSellOrders.count() == numberOrders)
+			if(openedBuyOrders.count() == numberOrders)
 			{
 				for(JTickers ticker : tickers)
 				{
 					if(ticker.getMarketName() == marketName)
 					{
+						qDebug()<<"!!!";
 						if(ticker.getBid() > (openedBuyOrders.first().getPrice()*(1+perestanovka)))
 						{
-							//ui->console->append("Цена ушла. Переставляю ордера");
-							sendMesageToTelegram("Цена ушла. Переставляю ордера.");
-							listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Цена ушла. Переставляю ордера.");
-							process = 7;
-							showProcess();
+							if(openedBuyOrders.first().getQuantity()==openedBuyOrders.first().getQuantityRemaining())
+							{
+								//ui->console->append("Цена ушла. Переставляю ордера");
+								sendMesageToTelegram("Цена ушла. Переставляю ордера.");
+								listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Цена ушла. Переставляю ордера.");
+								process = 7;
+								showProcess();
+							}
+
 						}
 					}
 				}
