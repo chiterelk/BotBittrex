@@ -273,10 +273,12 @@ void JBittrex::gotReply(QNetworkReply *reply)//прием и обработка 
 				}else{
 					qDebug()<<"Success is false";
 					qDebug()<<"message: "<<root.value("message").toString();
+					emit errorOpenBuyOreder();
 				}
 
 			}else{
 				qDebug()<<"Error!";
+				emit errorOpenBuyOreder();
 			}
 		}
 		if(url.indexOf("https://bittrex.com/api/v1.1/market/selllimit") >= 0)
@@ -293,10 +295,12 @@ void JBittrex::gotReply(QNetworkReply *reply)//прием и обработка 
 				}else{
 					qDebug()<<"Success is false";
 					qDebug()<<"message: "<<root.value("message").toString();
+					emit errorOpenSellOreder();
 				}
 
 			}else{
 				qDebug()<<"Error!";
+				emit errorOpenSellOreder();
 			}
 		}
 		if(url.indexOf("https://bittrex.com/api/v1.1/market/getopenorders") >= 0)
@@ -353,10 +357,12 @@ void JBittrex::gotReply(QNetworkReply *reply)//прием и обработка 
 			}else
 			{
 				qDebug()<<"Error!";
+				emit errorCancelOrder();
 			}
 		}
 	}else{
 		qDebug()<<reply->errorString();
+		emit errorCancelOrder();
 	}
 	reply->deleteLater();
 }

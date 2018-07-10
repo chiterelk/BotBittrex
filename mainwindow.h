@@ -48,6 +48,11 @@ public slots:
 
 	void canceledOrder();
 	void mainProcess();
+
+	void errorOpenBuyOreder();
+	void errorOpenSellOreder();
+	void errorCancelOrder();
+
 private slots:
 	void on_pushButtonStart_clicked();
 	void showProcess();

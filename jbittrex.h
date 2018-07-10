@@ -55,6 +55,9 @@ signals:
 	void openedSellOrder(QString _uuid);
 	void gotOpenOrders(QList <JOpenedOrder> _openedOrders);
 	void canceledOrder();
+	void errorOpenBuyOreder();
+	void errorOpenSellOreder();
+	void errorCancelOrder();
 private slots:
 
 

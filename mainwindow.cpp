@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include <QDateTime>
+#include <cmath>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -45,6 +46,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(bittrex,&JBittrex::openedSellOrder,this,&MainWindow::openedSellOrder);
 	connect(bittrex,&JBittrex::canceledOrder,this,&MainWindow::canceledOrder);
 	connect(bittrex,&JBittrex::gotOpenOrders,this,&MainWindow::gotOpenOrders);
+	connect(bittrex,&JBittrex::errorOpenBuyOreder,this,&MainWindow::errorOpenBuyOreder);
+	connect(bittrex,&JBittrex::errorOpenSellOreder,this,&MainWindow::errorOpenSellOreder);
+	connect(bittrex,&JBittrex::errorCancelOrder,this,&MainWindow::errorCancelOrder);
+
 
 	connect(NAMTelegram,&QNetworkAccessManager::finished,this,&MainWindow::answerFromTelegram);
 	walletTimer->start(10000);
@@ -73,6 +78,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->groupBoxEvents->hide();
 	ui->groupBoxBalances->hide();
 	ui->groupBoxOpenedOrders->hide();
+
+
 
 }
 
@@ -323,7 +330,7 @@ void MainWindow::gotOpenOrders(QList<JOpenedOrder> _openedOrders)
 	{
 		for(JOpenedOrder _openedBuyOrder:openedBuyOrders)
 		{
-			double buyOrderExecuted = true;
+			bool buyOrderExecuted = true;
 			for(JOpenedOrder _openedOrder: _openedOrders)
 			{
 				if(_openedBuyOrder.getOrderUuid() == _openedOrder.getOrderUuid())
@@ -331,7 +338,7 @@ void MainWindow::gotOpenOrders(QList<JOpenedOrder> _openedOrders)
 					buyOrderExecuted = false;
 					//double n = _openedOrder.getQuantity()-_openedOrder.getQuantityRemaining()
 					qDebug()<<_openedOrder.getQuantity()-_openedOrder.getQuantityRemaining()<<"/"<<_openedOrder.getQuantity();
-					if(_openedBuyOrder.getQuantityRemaining() != _openedOrder.getQuantityRemaining())
+					if(!(_openedBuyOrder.getQuantityRemaining() == _openedOrder.getQuantityRemaining()))
 						qDebug()<<"Ордер исполнен на половину";
 					break;
 				}
@@ -579,8 +586,8 @@ void MainWindow::mainProcess()
 								double summ = 0;
 								for(double i = 0; i<numberOrders;i++)
 								{
-									summ += 1 + martingail * i;
-									//summ += 1 + pow(martingeil,i);
+									//summ += 1 + martingail * i;
+									summ += 1 * pow(1+martingail,i);
 								}
 								double stepQuantity = Deposit/summ;
 								qDebug()<<"Первий ордер"<<stepQuantity;
@@ -597,16 +604,16 @@ void MainWindow::mainProcess()
 
 
 								buyOrders.clear();
-								if(minTradeSizeMainCurrency < stepQuantity)
+								if(/*minTradeSizeMainCurrency < stepQuantity*/1)
 								{
 									for(double i = 0; i<numberOrders;i++)
 									{
 
 											  double price = maxPrice - i * stepPrice;
 
-											  qDebug()<<"Quantity"<<i+1<<": "<<(stepQuantity + martingail * stepQuantity * i)/price;
-											  //buyOrders << new JSellOrder(price,(stepQuantity + pow(martingail,i) * stepQuantity)/price,currensyPair);
-											  buyOrders <<JSellOrder(price,(stepQuantity + martingail * stepQuantity * i)/price,marketName);
+											  qDebug()<<"Quantity"<<i+1<<": "<<(stepQuantity * pow(1+martingail,i))/price;
+											  buyOrders << JSellOrder(price,(stepQuantity * pow(martingail,i))/price,marketName);
+											  //buyOrders <<JSellOrder(price,(stepQuantity + martingail * stepQuantity * i)/price,marketName);
 											  qDebug()<<"Price: "<<buyOrders.last().getPrice();
 									}
 									qDebug()<<selectedTicker.getMarketName();
@@ -649,8 +656,10 @@ void MainWindow::mainProcess()
 		bittrex->getTickers();
 		if(!openedBuyOrders.isEmpty())
 		{
+			qDebug()<<"!openedBuyOrders.isEmpty()";
 			if(openedBuyOrders.count() == numberOrders)
 			{
+				qDebug()<<"openedBuyOrders.count() == numberOrders";
 				for(JTickers ticker : tickers)
 				{
 					if(ticker.getMarketName() == marketName)
@@ -741,9 +750,29 @@ void MainWindow::mainProcess()
 	case 12:
 		return;
 	case 13:
-			return;
+		return;
 	case 14:
-			return;
+		return;
 
 	}
+}
+
+void MainWindow::errorOpenBuyOreder()
+{
+	if(process == 11)
+		process = 4;
+}
+
+void MainWindow::errorOpenSellOreder()
+{
+	if(process == 13)
+		process = 6;
+}
+
+void MainWindow::errorCancelOrder()
+{
+	if(process == 12)
+		process = 6;
+	if(process == 14)
+		process = 7;
 }
