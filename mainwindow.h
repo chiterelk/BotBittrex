@@ -120,6 +120,7 @@ private:
 	QLabel *labelPing;
 
 	QList <QString> badPairs;
+	QList <QString> goodPairs;
 
 };
 

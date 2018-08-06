@@ -25,6 +25,7 @@ private:
 	void setMarketName(QString _marketName){	marketName_ = _marketName;	};
 	void setCreated(QString _created);
 	void setPrevDay(double _prevDay);
+	void setBaseVolume(double _baseVolume){ baseVolume_ = _baseVolume; };
 
 	double getAsk(void) const {	return ask_;	};
 	double getBid(void) const {	return bid_;	};

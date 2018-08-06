@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	badPairs<<"BTC-DOPE";
 	badPairs<<"BTC-PTC";
 
+	goodPairs<<"BTC-PART";
+	goodPairs<<"BTC-FCT";
 
 
 
@@ -340,9 +342,8 @@ void MainWindow::gotOpenOrders(QList<JOpenedOrder> _openedOrders)
 				if(_openedBuyOrder.getOrderUuid() == _openedOrder.getOrderUuid())
 				{
 					buyOrderExecuted = false;
-					//double n = _openedOrder.getQuantity()-_openedOrder.getQuantityRemaining()
 					qDebug()<<_openedOrder.getQuantity()-_openedOrder.getQuantityRemaining()<<"/"<<_openedOrder.getQuantity();
-					if(!(_openedBuyOrder.getQuantityRemaining() == _openedOrder.getQuantityRemaining()))
+					if(!(_openedOrder.getQuantityRemaining() == _openedOrder.getQuantityRemaining()))
 						qDebug()<<"Ордер исполнен на половину";
 					break;
 				}
@@ -377,29 +378,7 @@ void MainWindow::gotOpenOrders(QList<JOpenedOrder> _openedOrders)
 		}
 
 
-//		double buyOrderExecuted = true;
-//		for(JOpenedOrder _openedOrder: _openedOrders)
-//		{
-//			if(openedBuyOrders.first().getOrderUuid() == _openedOrder.getOrderUuid())
-//			{
-//				buyOrderExecuted = false;
-//				qDebug()<<_openedOrder.getQuantity();
-//				break;
-//			}
-//		}
-//		if(buyOrderExecuted)
-//		{
-//			midPrice = (midPrice*summQuantity+ openedBuyOrders.first().getPrice()*openedBuyOrders.first().getQuantity())/(summQuantity+openedBuyOrders.first().getQuantity());
-//			summQuantity += openedBuyOrders.first().getQuantity();
-//			qDebug()<<"midPrice: "<<midPrice;
-//			qDebug()<<"summQuntity: "<<QString::number(summQuantity,'f',8);
-//			openedBuyOrders.removeFirst();
-//			showOrders();
-//			process = 6;
-//			showProcess();
-//			listModelEvents->addEvent(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss ")+"Ордер на покупку исполнен.");
-//			sendMesageToTelegram("Ордер на покупку исполнен.");
-//		}
+
 	}
 	if(!openedSellOrders.isEmpty())
 	{
@@ -500,6 +479,15 @@ void MainWindow::mainProcess()
 			double baseVolume = 0;
 			for(int i = tickers.count()-1;i>=0;i--)//убираю хуевые пары.
 			{
+				for(int n = 0; n<goodPairs.count();n++)
+				{
+					if(tickers.at(i).getMarketName()==goodPairs.at(n))
+					{
+						tickers.at(i).setBaseVolume(tickers.at(i).getBaseVolume() * 1.5);
+						break;
+					}
+				}//Увеличение шанса попасть в цикл, для хороших валют.
+
 				for(int n = 0; n<badPairs.count();n++)
 				{
 					if(tickers.at(i).getMarketName()==badPairs.at(n))
@@ -508,6 +496,7 @@ void MainWindow::mainProcess()
 						break;
 					}
 				}
+
 			}
 			for(int i = tickers.count()-1;i>=0;i--)//убираю хуевые пары.
 			{
