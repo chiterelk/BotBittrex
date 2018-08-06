@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>757</width>
-    <height>490</height>
+    <width>767</width>
+    <height>607</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>BotBittrex</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_5">
@@ -309,13 +309,20 @@
          <string>Events</string>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="1" column="0">
+         <item row="2" column="0">
           <widget class="QListView" name="listViewEvents"/>
          </item>
          <item row="0" column="0">
           <widget class="QCheckBox" name="checkBoxStop">
            <property name="text">
             <string>Остановиться при окончании цикла.</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="pushButton_2">
+           <property name="text">
+            <string>Начать заново</string>
            </property>
           </widget>
          </item>
@@ -387,8 +394,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>757</width>
-     <height>21</height>
+     <width>767</width>
+     <height>26</height>
     </rect>
    </property>
   </widget>

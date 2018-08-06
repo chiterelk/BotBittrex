@@ -204,7 +204,11 @@ void MainWindow::gotTickers(QList<JTickers> _tickers)
 			}
 
 		}
-	}
+    }else{
+        tickers = _tickers;//
+        if(!_tickers.isEmpty())//
+            _tickers.clear();//
+    }
 }
 
 void MainWindow::showBalances(QList<JBalance> &_wallet)
@@ -520,17 +524,24 @@ void MainWindow::mainProcess()
 					tickers.removeAt(i);
 				}
 			}
+            //double baseSpread = 0; //!!!
+            double baseRank = 0;
 			for(JTickers ticker : tickers)
 			{
 				if(ticker.getSpread() > minSpread)
 				{
-					if(ticker.getSpread() < 0.05)
+                    if(ticker.getSpread() < 0.1)//!!!!
 					{
-						if(ticker.getBaseVolume()>baseVolume)
+                        /*if(ticker.getBaseVolume()>baseVolume)
 						{
 							baseVolume = ticker.getBaseVolume();
 							tickerSpread = ticker;
-						}
+                        }*/
+                        if((ticker.getSpread() * ticker.getBaseVolume())>baseRank)
+                        {
+                            baseRank = ticker.getSpread() * ticker.getBaseVolume();
+                            tickerSpread = ticker;
+                        }
 					}
 				}
 			}
@@ -571,13 +582,15 @@ void MainWindow::mainProcess()
 
 							double x = (100*selectedTicker.getBid()-100*selectedTicker.getAsk()+selectedTicker.getAsk()*(selectedTicker.getSpread()*0.8*100))/((selectedTicker.getSpread()*0.8*100)-200);
 							double priceBuy;
-							double priceSell;
-							priceBuy = QString::number(selectedTicker.getBid()+x*0.1,'f',8).toDouble();
-							priceSell = QString::number(selectedTicker.getAsk()-x*1.9,'f',8).toDouble();
+                            double priceSell;
+                            //priceBuy = QString::number(selectedTicker.getBid()+x*0.1,'f',8).toDouble();
+                            //priceSell = QString::number(selectedTicker.getAsk()-x*1.9,'f',8).toDouble();
+                            priceBuy = QString::number(selectedTicker.getBid()+x*1.0,'f',8).toDouble();
+                            priceSell = QString::number(selectedTicker.getAsk()-x*1.0,'f',8).toDouble();
 							if(priceBuy==priceSell)
 								priceSell = priceSell + 0.00000001;
 							profit = (priceSell-priceBuy)/priceSell;
-
+                            qDebug()<<"profit = "<<profit;
 
 
 							Deposit = deposit * balance.getAvailable();
@@ -586,8 +599,8 @@ void MainWindow::mainProcess()
 								double summ = 0;
 								for(double i = 0; i<numberOrders;i++)
 								{
-									//summ += 1 + martingail * i;
-									summ += 1 * pow(1+martingail,i);
+                                    summ += 1 + martingail * i;
+                                    //summ += 1 * pow(1+martingail,i);
 								}
 								double stepQuantity = Deposit/summ;
 								qDebug()<<"Первий ордер"<<stepQuantity;
@@ -611,9 +624,9 @@ void MainWindow::mainProcess()
 
 											  double price = maxPrice - i * stepPrice;
 
-											  qDebug()<<"Quantity"<<i+1<<": "<<(stepQuantity * pow(1+martingail,i))/price;
-											  buyOrders << JSellOrder(price,(stepQuantity * pow(martingail,i))/price,marketName);
-											  //buyOrders <<JSellOrder(price,(stepQuantity + martingail * stepQuantity * i)/price,marketName);
+                                              //qDebug()<<"Quantity"<<i+1<<": "<<(stepQuantity * pow(1+martingail,i))/price;
+                                              //buyOrders << JSellOrder(price,(stepQuantity * pow(martingail,i))/price,marketName);
+                                              buyOrders <<JSellOrder(price,(stepQuantity + martingail * stepQuantity * i)/price,marketName);
 											  qDebug()<<"Price: "<<buyOrders.last().getPrice();
 									}
 									qDebug()<<selectedTicker.getMarketName();
@@ -656,17 +669,19 @@ void MainWindow::mainProcess()
 		bittrex->getTickers();
 		if(!openedBuyOrders.isEmpty())
 		{
-			qDebug()<<"!openedBuyOrders.isEmpty()";
+            //qDebug()<<"!openedBuyOrders.isEmpty()";
 			if(openedBuyOrders.count() == numberOrders)
 			{
-				qDebug()<<"openedBuyOrders.count() == numberOrders";
+                //qDebug()<<"openedBuyOrders.count() == numberOrders";
+                //qDebug()<<"marketName - "<<marketName;
 				for(JTickers ticker : tickers)
 				{
 					if(ticker.getMarketName() == marketName)
 					{
-						qDebug()<<"!!!";
+                        //qDebug()<<"!!!";
 						if(ticker.getBid() > (openedBuyOrders.first().getPrice()*(1+perestanovka)))
 						{
+                            qDebug()<<"Цена ушла. Я должен переставить ордера";
 							if(openedBuyOrders.first().getQuantity()==openedBuyOrders.first().getQuantityRemaining())
 							{
 								//ui->console->append("Цена ушла. Переставляю ордера");
@@ -696,7 +711,7 @@ void MainWindow::mainProcess()
 			showProcess();
 //			if(midPrice > bid*(1-otstup))
 //			{
-				bittrex->openSellOrder(apiKey,secretKey,marketName,summQuantity/*-0.00000001*/,midPrice*(1+profit));
+                bittrex->openSellOrder(apiKey,secretKey,marketName,summQuantity-0.00000001,midPrice*(1+profit));
 //			}
 
 		}else{
@@ -775,4 +790,12 @@ void MainWindow::errorCancelOrder()
 		process = 6;
 	if(process == 14)
 		process = 7;
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+        if(process == 5)
+        {
+            process = 7;
+        }
 }
